@@ -16,19 +16,29 @@ import java.util.EmptyStackException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+//ExtendWith -> 스프링의 기능을 test 클래스(junit)에서도 사용할 수 있게 해줌.
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = UserDaoFactory.class)
 
 class UserDaoTest {
+
+    // Autowired = Spring을 사용해 context를 만들기 = singleton 적용.
+    // 밑의 테스트를 실행할 때마다 새로 생성되는 것이 아니라, 한 번 생성해서 계속 씀.
     @Autowired
     ApplicationContext context;
 
     // 반복되는 객체 생성은 beforeeach로 처리!!
     UserDao userDao;
+    User user1;
+    User user2;
+    User user3;
 
     @BeforeEach
     void setUp(){
-        userDao = context.getBean("aUserDao", UserDao.class);
+        this.userDao = context.getBean("aUserDao", UserDao.class);
+        this.user1 = new User("1","a","aaaa");
+        this.user2 = new User("2","b","bbbb");
+        this.user3 = new User("3","c","cccc");
     }
 
     @Test
@@ -50,10 +60,6 @@ class UserDaoTest {
 
     @Test
     void count() throws SQLException, ClassNotFoundException {
-
-        User user1 = new User("1","a","aaaa");
-        User user2 = new User("2","b","bbbb");
-        User user3 = new User("3","c","cccc");
 
         userDao.deleteAll();
         assertEquals(0,userDao.getCount());
