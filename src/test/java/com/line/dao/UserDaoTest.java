@@ -22,17 +22,18 @@ class UserDaoTest {
     ApplicationContext context;
 
     @Test
-    void addAndSelect() throws SQLException, ClassNotFoundException {
+    void addAndGet() throws SQLException, ClassNotFoundException {
 
         UserDao userDao = context.getBean("aUserDao", UserDao.class);
         userDao.deleteAll();
 
-        User user = new User("1", "soonmin","1234");
-        userDao.add(user);
+        User user1 = new User("1","a","aaaa");
+
+        userDao.add(user1);
         assertEquals(1,userDao.getCount());
 
         User selecteduser = userDao.select("1");
-        assertEquals("soonmin", selecteduser.getName());
+        assertEquals(user1.getName(), selecteduser.getName());
 
         userDao.deleteAll();
         assertEquals(0,userDao.getCount());
