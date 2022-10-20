@@ -45,14 +45,14 @@ public class UserDao {
 
         ps.setString(1, input);
 
-        ResultSet rs =ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
 
         // 예외 처리 잡아내기
         User user = null;
 
         // next()로 데이터가 있는 지 확인하고, 있을 경우에만 정보 가져오기
-        if(rs.next()) {
-            user = new User(rs.getString("id"), rs.getString("name"),rs.getString("password"));
+        if (rs.next()) {
+            user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
         }
 
         rs.close();
@@ -60,40 +60,91 @@ public class UserDao {
         conn.close();
 
         // 데이터가 없어서 객체가 안만들어지면, 예외처리
-        if (user ==null) { throw new EmptyResultDataAccessException(1);}
+        if (user == null) {
+            throw new EmptyResultDataAccessException(1);
+        }
 
         return user;
     }
 
-    public void deleteAll() throws SQLException, ClassNotFoundException {
+    public void deleteAll() {
 
-        Connection conn = connectionMaker.getConnection();
+        Connection conn = null;
+        PreparedStatement ps = null;
 
-        PreparedStatement ps = conn.prepareStatement(
-                "DELETE FROM users"
-        );
+        // DB 연결 시 발생할 예외를 try/catch로 잡기.
+        try {
 
-        ps.executeUpdate();
+            conn = connectionMaker.getConnection();
+            ps = conn.prepareStatement("DELETE FROM users");
+            ps.executeUpdate();
 
-        ps.close();
-        conn.close();
+        } catch (ClassNotFoundException e) {
+
+            throw new RuntimeException(e);
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(e);
+
+        } finally { // 예외가 발생하든 안하든, .close()는 반드시 실행!
+
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
     }
 
+
     public int getCount() throws SQLException, ClassNotFoundException {
-        Connection conn = connectionMaker.getConnection();
-        PreparedStatement ps = conn.prepareStatement(
-                "SELECT count(*) from users"
-        );
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-        ResultSet rs = ps.executeQuery();
-        rs.next();
-        int count = rs.getInt(1);
+        try {
 
-        rs.close();
-        ps.close();
-        conn.close();
+            conn = connectionMaker.getConnection();
+            ps = conn.prepareStatement("SELECT count(*) from users");
 
-        return count;
+            rs = ps.executeQuery();
+            rs.next();
+            int count = rs.getInt(1);
+
+            return count;
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {// 예외가 발생하든 안하든, .close()는 반드시 실행!
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                }
+            }
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
     }
 
     public static void main(String[] args) {
