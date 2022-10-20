@@ -2,6 +2,7 @@ package com.line.dao;
 
 import com.line.dao.conncetionMaker.ConnectionMaker;
 import com.line.dao.domain.User;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -45,13 +46,21 @@ public class UserDao {
         ps.setString(1, input);
 
         ResultSet rs =ps.executeQuery();
-        rs.next();
 
-        User user = new User(rs.getString("id"), rs.getString("name"),rs.getString("password"));
+        // 예외 처리 잡아내기
+        User user = null;
+
+        // next()로 데이터가 있는 지 확인하고, 있을 경우에만 정보 가져오기
+        if(rs.next()) {
+            user = new User(rs.getString("id"), rs.getString("name"),rs.getString("password"));
+        }
 
         rs.close();
         ps.close();
         conn.close();
+
+        // 데이터가 없어서 객체가 안만들어지면, 예외처리
+        if (user ==null) { throw new EmptyResultDataAccessException(1);}
 
         return user;
     }
